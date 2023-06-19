@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendPdfWablasJob;
 use App\Jobs\SendSmsJob;
+use App\Jobs\SendVideoWablasJob;
+use App\Jobs\SendWablasJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class DashboardController extends Controller
@@ -22,62 +26,23 @@ class DashboardController extends Controller
         return view('welcome', compact('batches'));
     }
 
-    public function process(Request $request)
+    public function processWablas(Request $request)
     {
-        ini_set('max_execution_time', 300);
-
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:10240', // 10MB Max
         ]);
 
-        $msg = 'RM0.00 Kempen CSC HEHEHEHE.';
         $file = $request->file->getRealPath();
-        $chunkSize = 2000;
+        $fastExcel = new FastExcel;
+        $rows = $fastExcel->import($file);
 
-        $batches = [];
-        $batchList = $this->processDataInChunks($file, $chunkSize, $msg);
-
-        foreach($batchList as $batch) {
-            $batches[] = $batch->id;
-        }
-
-        return redirect('/dashboard?batches=' . serialize($batches));
-    }
-
-    private function processDataInChunks($file, $chunkSize, $msg)
-    {
-        $jobs = [];
-        $chunk_data = [];
-        $count = 0;
-
-        (new FastExcel())->import($file, function ($data) use (&$count, &$chunk_data, $chunkSize, &$jobs, $msg) {
-            $chunk_data[] = $data;
-
-            if (++$count % $chunkSize === 0) {
-                foreach ($chunk_data as $item) {
-                    $jobs[] = new SendSmsJob($item['phone_number'], $msg);
-                }
-                $chunk_data = []; // Reset chunk data after processing
-            }
-        });
-
-        // Process remaining chunk data if it exists
-        if (!empty($chunk_data)) {
-            foreach ($chunk_data as $item) {
-                $jobs[] = new SendSmsJob($item['phone_number'], $msg);
+        $delayCounter = 0;
+        foreach ($rows as $row) {
+            if (isset($row['NO_HSET'])) {
+                SendWablasJob::dispatch($row['NO_HSET'])->delay(now()->addSeconds($delayCounter));
+                // SendPdfWablasJob::dispatch($row['NO_HSET'])->delay(now()->addSeconds($delayCounter));
+                // SendVideoWablasJob::dispatch($row['NO_HSET'])->delay(now()->addSeconds($delayCounter));
             }
         }
-
-        $jobChunks = array_chunk($jobs, 200);  // Adjust this value as needed
-
-        $batches = [];
-        foreach ($jobChunks as $chunk) {
-            $batches[] = Bus::batch($chunk)
-                ->onConnection('database')
-                ->onQueue('default')
-                ->dispatch();
-        }
-
-        return $batches;
     }
 }

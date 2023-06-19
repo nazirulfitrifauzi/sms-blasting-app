@@ -31,6 +31,7 @@ class Sms
             'pass' => $this->api_secret,
             'to' => $contact,
             'msg' => $message,
+            'type' => 0,
         ];
 
         Log::info('Sending SMS with data: ' . json_encode($data));

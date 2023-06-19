@@ -21,3 +21,4 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::post('/process', [DashboardController::class, 'process'])->name('file.process');
+Route::post('/processWablas', [DashboardController::class, 'processWablas'])->name('file.processWablas');

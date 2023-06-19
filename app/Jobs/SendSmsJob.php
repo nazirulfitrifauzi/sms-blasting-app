@@ -27,12 +27,12 @@ class SendSmsJob implements ShouldQueue
 
     public function handle()
     {
-        usleep(100000);
+        // usleep(100000);
         // Log::info('Handling SendSmsJob for phone number: ' . $this->phone_number);
 
         try {
-            // $sms = new Sms();
-            // $sms->bulk($this->phone_number, $this->msg);
+            $sms = new Sms();
+            $sms->bulk($this->phone_number, $this->msg);
 
             Log::info('Successfully sent SMS to : ' . $this->phone_number);
         } catch (\Exception $e) {

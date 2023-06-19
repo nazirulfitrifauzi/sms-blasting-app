@@ -130,6 +130,9 @@ return [
     | Custom Global Parameters
     |--------------------------------------------------------------------------
     */
+    'wablas_api_url' => env('WABLAS_API_URL', ''),
+    'wablas_api_token' => env('WABLAS_API_TOKEN', ''),
+
     'esms_api_url' => env('ESMS_API_URL', ''),
     'esms_api_key' => env('ESMS_API_KEY', ''),
     'esms_api_secret' => env('ESMS_API_SECRET', ''),

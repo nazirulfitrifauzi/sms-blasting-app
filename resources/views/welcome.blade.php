@@ -22,7 +22,7 @@
         @livewireStyles
     </head>
     <body class="antialiased">
-        <form action="{{ route('file.process') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('file.processWablas') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
                 <label class="form-label" for="inputFile">File:</label>
@@ -40,7 +40,7 @@
             </div>
         </form>
 
-        @if (!is_null($batches) && $batches->isNotEmpty())
+        {{-- @if (!is_null($batches) && $batches->isNotEmpty())
             @foreach($batches as $batch)
                 <div class="mt-4">
                     {{ $batch->processedJobs() }} completed out of {{ $batch->totalJobs }} ({{ $batch->progress() }}%)
@@ -58,6 +58,6 @@
                     window.location.reload();
                 }
             </script>
-        @endif
+        @endif --}}
     </body>
 </html>
